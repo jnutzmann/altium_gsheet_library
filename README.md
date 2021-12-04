@@ -28,7 +28,8 @@ The scripts in this file expect the Google Sheet to be set up in a specific way.
 First, each component category gets its own tab (for example "Resistor",
 "IC/Memory", etc).
 
-![Categories](https://github.com/jnutzmann/altium_gsheet_library/blob/main/docs/categories.png?raw=true | width=100)
+<img src="https://github.com/jnutzmann/altium_gsheet_library/blob/main/docs/categories.png?raw=true" width="100px" />
+
 
 Within each tab, fields for the specific component type can be defined.  There
 are a few required fields to make the library work correct, but others are left
@@ -53,7 +54,8 @@ be appended to end of the field name:
 - `^` - Adding this symbol will make the field be treated as a link so that
   you can right click on the component and open a link in Altium (like a
   Datasheet)
-[Special Char](https://github.com/jnutzmann/altium_gsheet_library/blob/main/docs/special_char.png?raw=true | width=150)
+
+<img src="https://github.com/jnutzmann/altium_gsheet_library/blob/main/docs/special_char.png?raw=true" width="150px" />
 
 ## Setup
 
