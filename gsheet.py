@@ -27,7 +27,7 @@ import uuid
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 
-from models import Category, Field
+from .models import Category, Field
 
 
 class GSheetReader:
@@ -133,6 +133,8 @@ class GSheetReader:
         
                 database.execute(query)
                 component_count += 1
+        
+        database.commit()
         
         if new_id_count > 0:
             print('')

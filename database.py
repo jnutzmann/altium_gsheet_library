@@ -44,6 +44,9 @@ class LibraryDatabase:
         # Get Cursor
         self._cursor = self._conn.cursor()
 
+    def commit(self):
+        self._conn.commit()
+
     def execute(self, query):
         return self._cursor.execute(query)
 

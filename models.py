@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 
-from altium import ALTIUM_SPECIAL_FIELDS
+from .altium import ALTIUM_SPECIAL_FIELDS
 
 
 class Category:

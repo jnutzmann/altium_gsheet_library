@@ -22,19 +22,19 @@
 
 import argparse
 
-from altium import generateDbLibFile
-from database import LibraryDatabase
-from gsheet import GSheetReader
-from sync_config import SyncConfig
+from .altium import generateDbLibFile
+from .database import LibraryDatabase
+from .gsheet import GSheetReader
+from .sync_config import SyncConfig
 
 
 def sync(config_file):
 
-    print('[1/N] Reading config file: %s' % config_file.name)
+    print('[1/8] Reading config file: %s' % config_file.name)
     sync_config = SyncConfig(config_file)
 
     database_config = sync_config.get('database')
-    print('[2/N] Connecting to database %s@%s:%s (%s)... ' % 
+    print('[2/8] Connecting to database %s@%s:%s (%s)... ' % 
         (database_config['user'], database_config['host'],
         database_config['port'], database_config['database']
     ), end='', flush=True)
@@ -42,31 +42,31 @@ def sync(config_file):
     print('Connected.')
 
     try:
-        print('[3/N] Connecting to Google sheet... ', end='', flush=True)
+        print('[3/8] Connecting to Google sheet... ', end='', flush=True)
         gsReader = GSheetReader(sync_config.get('gsheet'))
         print('Connected.')
        
-        print('[4/N] Reading & validating schema from Google sheet... ', 
+        print('[4/8] Reading & validating schema from Google sheet... ', 
               end='', flush=True)
         count = gsReader.readAndValidateCategories()
         print('Found %i valid categories.' % count)
 
 
-        print('[5/N] Droping current library tables... ', end='', flush=True)
+        print('[5/8] Droping current library tables... ', end='', flush=True)
         count = db.dropAllTables()
         print('Dropped %i tables.' % count)
 
-        print('[6/N] Creating new schema... ', end='', flush=True)
+        print('[6/8] Creating new schema... ', end='', flush=True)
         for c in gsReader.categories:
             query = gsReader.categories[c].generate_create_table()
             db.execute(query)
         print('Created %i new tables.' % len(gsReader.categories))
 
-        print('[7/N] Adding Components to database... ', end='', flush=True)
+        print('[7/8] Adding Components to database... ', end='', flush=True)
         count = gsReader.addComponentsToDatabase(db)
         print('Added %i components to database.' % count)
 
-        print('[8/N] Updating DbLib file... ', end='', flush=True)
+        print('[8/8] Updating DbLib file... ', end='', flush=True)
         generateDbLibFile(gsReader.categories, db.getConnectionString(), 
         sync_config.get('altium')['dblib_file'])
         print('Done.')
@@ -76,15 +76,14 @@ def sync(config_file):
         print('Done!! Closed DB connection.')
 
 
+# if __name__ == "__main__":
 
-if __name__ == "__main__":
+#     parser = argparse.ArgumentParser(
+#         description='Sync altium library from target gSheet.')
 
-    parser = argparse.ArgumentParser(
-        description='Sync altium library from target gSheet.')
+#     parser.add_argument('--config', type=argparse.FileType('r'), nargs='?',
+#                         metavar='c', default='config.ini',
+#                         help='Configuration file for sync.')
+#     args = parser.parse_args()
 
-    parser.add_argument('--config', type=argparse.FileType('r'), nargs='?',
-                        metavar='c', default='config.ini',
-                        help='Configuration file for sync.')
-    args = parser.parse_args()
-
-    sync(args.config)
+#     sync(args.config)
