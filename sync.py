@@ -28,18 +28,10 @@ from gsheet import GSheetReader
 from sync_config import SyncConfig
 
 
-if __name__ == "__main__":
+def sync(config_file):
 
-    parser = argparse.ArgumentParser(
-        description='Sync altium library from target gSheet.')
-
-    parser.add_argument('--config', type=argparse.FileType('r'), nargs='?',
-                        metavar='c', default='config.ini',
-                        help='Configuration file for sync.')
-    args = parser.parse_args()
-
-    print('[1/N] Reading config file: %s' % args.config.name)
-    sync_config = SyncConfig(args.config)
+    print('[1/N] Reading config file: %s' % config_file.name)
+    sync_config = SyncConfig(config_file)
 
     database_config = sync_config.get('database')
     print('[2/N] Connecting to database %s@%s:%s (%s)... ' % 
@@ -82,6 +74,22 @@ if __name__ == "__main__":
     finally:
         db.close()
         print('Done!! Closed DB connection.')
+
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(
+        description='Sync altium library from target gSheet.')
+
+    parser.add_argument('--config', type=argparse.FileType('r'), nargs='?',
+                        metavar='c', default='config.ini',
+                        help='Configuration file for sync.')
+    args = parser.parse_args()
+
+    sync(args.config)
+
+    
 
 
 
