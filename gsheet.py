@@ -116,8 +116,9 @@ class GSheetReader:
                     print('\n -> Assigned Component ID "%s" for row %i in category "%s"' 
                             % (new_uuid, row_index+2, c), end='', flush=True)
 
+                    parts_rows[row_index][componet_id_index] = new_uuid
                     new_id_count += 1
-        
+                    
                 # TODO: sanitize inputs
                 query = "INSERT INTO `%s` (" % c
 
