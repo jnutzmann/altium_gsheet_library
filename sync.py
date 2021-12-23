@@ -28,7 +28,7 @@ from .gsheet import GSheetReader
 from .sync_config import SyncConfig
 
 
-def sync(config_file):
+def sync(config_file, field_populators=[]):
 
     print('[1/8] Reading config file: %s' % config_file.name)
     sync_config = SyncConfig(config_file)
@@ -63,7 +63,7 @@ def sync(config_file):
         print('Created %i new tables.' % len(gsReader.categories))
 
         print('[7/8] Adding Components to database... ', end='', flush=True)
-        count = gsReader.addComponentsToDatabase(db)
+        count = gsReader.addComponentsToDatabase(db, field_populators=field_populators)
         print('Added %i components to database.' % count)
 
         print('[8/8] Updating DbLib file... ', end='', flush=True)

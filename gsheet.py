@@ -87,8 +87,8 @@ class GSheetReader:
                     % (c, missing_fields))
 
         return len(self.categories)
-                
-    def addComponentsToDatabase(self, database):
+
+    def addComponentsToDatabase(self, database, field_populators=[]):
 
         new_id_count = 0
         component_count = 0
@@ -116,8 +116,19 @@ class GSheetReader:
                     print('\n -> Assigned Component ID "%s" for row %i in category "%s"' 
                             % (new_uuid, row_index+2, c), end='', flush=True)
 
-                    parts_rows[row_index][componet_id_index] = new_uuid
+                    parts_rows[row_index][componet_id_index] = str(new_uuid)
                     new_id_count += 1
+
+                for f in field_populators:
+                    val, update_index = f(self.categories[c], parts_rows[row_index])
+                    if update_index >= 0:
+                        self._sheet.values().update(
+                            spreadsheetId=self._config['sheet_id'], 
+                            range='%s!%s%i' 
+                            % (c, GSheetReader.COLUMN_NAMES[update_index], 
+                                row_index+2), valueInputOption='RAW',
+                                body={'values':[[str(val)]]}).execute()
+                        parts_rows[row_index][update_index] = str(val)
                     
                 # TODO: sanitize inputs
                 query = "INSERT INTO `%s` (" % c
@@ -137,7 +148,6 @@ class GSheetReader:
         
         database.commit()
         
-        if new_id_count > 0:
-            print('')
+        print('')
         
         return component_count
