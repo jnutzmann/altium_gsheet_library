@@ -27,6 +27,8 @@ import uuid
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 
+from termcolor import colored
+
 from .models import Category, Field
 
 
@@ -113,8 +115,8 @@ class GSheetReader:
                             row_index+2), valueInputOption='RAW',
                             body={'values':[[str(new_uuid)]]}).execute()
 
-                    print('\n -> Assigned Component ID "%s" for row %i in category "%s"' 
-                            % (new_uuid, row_index+2, c), end='', flush=True)
+                    print(colored('\n -> Assigned Component ID "%s" for row %i in category "%s"' 
+                            % (new_uuid, row_index+2, c), 'green'), end='', flush=True)
 
                     parts_rows[row_index][componet_id_index] = str(new_uuid)
                     new_id_count += 1

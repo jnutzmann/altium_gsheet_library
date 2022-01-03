@@ -22,6 +22,9 @@
 
 
 import configparser
+import os
+
+from termcolor import colored
 
 
 ALTIUM_SPECIAL_FIELDS = ['Description', 'Library Ref', 'Library Path', 
@@ -153,3 +156,36 @@ def generateDbLibFile(categories, connection_string, filename):
         config.write(f)
 
 
+def getLibraryFiles(alitum_config):
+    try:
+        symbol_files = [x.lower() for x in os.listdir(os.path.join(os.path.dirname(
+            os.path.realpath(alitum_config['dblib_file'])), 'symbols'))]
+    except:
+        symbol_files = []
+
+    try:
+        footprint_files = [x.lower() for x in os.listdir(os.path.join(os.path.dirname(
+            os.path.realpath(alitum_config['dblib_file'])), 'footprints'))]
+    except:
+        footprint_files = []
+
+    return symbol_files, footprint_files
+
+
+def fileValidator(symbol_files, footprint_files, categories, rows):
+
+    symbol = rows[categories.field_index('library_path')]
+    footprint = rows[categories.field_index('footprint_path')]
+    category = categories.name
+    component_id = rows[categories.field_index('component_id')]
+
+    if symbol.lower() not in symbol_files:
+        print(colored('\n -> Warning: file "%s" not found in symbol folder. (%s:%s)' 
+                            % (symbol, category, component_id), 'yellow'), end='', flush=True)
+
+    if footprint.lower() not in footprint_files:
+        print(colored('\n -> Warning: file "%s" not found in footprint folder. (%s:%s)' 
+                            % (footprint, category, component_id), 'yellow'), end='', flush=True)
+
+    # Do not update anything
+    return None, -1

@@ -20,9 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 # SOFTWARE.
 
-import argparse
+#import argparse
 
-from .altium import generateDbLibFile
+from .altium import generateDbLibFile, getLibraryFiles, fileValidator
 from .database import LibraryDatabase
 from .gsheet import GSheetReader
 from .sync_config import SyncConfig
@@ -51,7 +51,6 @@ def sync(config_file, field_populators=[]):
         count = gsReader.readAndValidateCategories()
         print('Found %i valid categories.' % count)
 
-
         print('[5/8] Droping current library tables... ', end='', flush=True)
         count = db.dropAllTables()
         print('Dropped %i tables.' % count)
@@ -62,8 +61,12 @@ def sync(config_file, field_populators=[]):
             db.execute(query)
         print('Created %i new tables.' % len(gsReader.categories))
 
+        symbol_files, footprint_files = getLibraryFiles(sync_config.get('altium'))
+        validator = [lambda a,b : fileValidator(symbol_files, footprint_files, a, b)]
+
         print('[7/8] Adding Components to database... ', end='', flush=True)
-        count = gsReader.addComponentsToDatabase(db, field_populators=field_populators)
+        count = gsReader.addComponentsToDatabase(db, 
+                    field_populators=(field_populators + validator))
         print('Added %i components to database.' % count)
 
         print('[8/8] Updating DbLib file... ', end='', flush=True)
