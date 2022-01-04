@@ -22,6 +22,7 @@
 
 
 import configparser
+from genericpath import isfile
 import os
 
 from termcolor import colored
@@ -157,35 +158,83 @@ def generateDbLibFile(categories, connection_string, filename):
 
 
 def getLibraryFiles(alitum_config):
-    try:
-        symbol_files = [x.lower() for x in os.listdir(os.path.join(os.path.dirname(
-            os.path.realpath(alitum_config['dblib_file'])), 'symbols'))]
-    except:
-        symbol_files = []
+    
+    symbol_files = {}
+    footprint_files = {}
 
     try:
-        footprint_files = [x.lower() for x in os.listdir(os.path.join(os.path.dirname(
-            os.path.realpath(alitum_config['dblib_file'])), 'footprints'))]
+        symbol_dir = os.path.join(os.path.dirname(os.path.realpath(alitum_config['dblib_file'])), 'symbols')
+        files = os.listdir(symbol_dir)
+
+        for f in files:
+            fpath = os.path.join(symbol_dir, f)
+            if not os.path.isfile(fpath):
+                # ignore subfolders (like History)
+                continue
+
+            symbols = []
+            with open(fpath, mode='rb') as lib_file:
+                contents = str(lib_file.read()).split('|')
+                for s in contents:
+                    if 'LibReference' in s:
+                        symbols.append(s.split('=')[1])
+            
+            symbol_files[f.lower()] = symbols
     except:
-        footprint_files = []
+        pass
+
+    try:
+        footprint_dir = os.path.join(os.path.dirname(os.path.realpath(alitum_config['dblib_file'])), 'footprints')
+        files = os.listdir(footprint_dir)
+
+        for f in files:
+            fpath = os.path.join(footprint_dir, f)
+            if not os.path.isfile(fpath):
+                # ignore subfolders (like History)
+                continue
+
+            footprints = []
+
+            with open(fpath, mode='rb') as lib_file:
+                contents = str(lib_file.read()).split('|')
+                for s in contents:
+                    if 'PATTERN' in s:
+                        footprints.append(s.split('=')[1])
+            
+            footprint_files[f.lower()] = footprints
+    except:
+        pass
 
     return symbol_files, footprint_files
 
 
 def fileValidator(symbol_files, footprint_files, categories, rows):
 
-    symbol = rows[categories.field_index('library_path')]
-    footprint = rows[categories.field_index('footprint_path')]
+    symbol_path = rows[categories.field_index('library_path')].lower()
+    footprint_path = rows[categories.field_index('footprint_path')].lower()
+
+    symbol = rows[categories.field_index('library_ref')]
+    footprint = rows[categories.field_index('footprint_ref')]
+
+
     category = categories.name
     component_id = rows[categories.field_index('component_id')]
 
-    if symbol.lower() not in symbol_files:
+    if symbol_path not in symbol_files:
         print(colored('\n -> Warning: file "%s" not found in symbol folder. (%s:%s)' 
-                            % (symbol, category, component_id), 'yellow'), end='', flush=True)
+                            % (symbol_path, category, component_id), 'yellow'), end='', flush=True)
 
-    if footprint.lower() not in footprint_files:
+    elif symbol not in symbol_files[symbol_path]:
+        print(colored('\n -> Warning: file "%s" does not contain the expected symbol "%s". (%s:%s)' 
+                        % (symbol_path, symbol, category, component_id), 'yellow'), end='', flush=True)
+
+    if footprint_path not in footprint_files:
         print(colored('\n -> Warning: file "%s" not found in footprint folder. (%s:%s)' 
-                            % (footprint, category, component_id), 'yellow'), end='', flush=True)
+                            % (footprint_path, category, component_id), 'yellow'), end='', flush=True)
+        
+    elif footprint not in footprint_files[footprint_path]:
+        print(colored('\n -> Warning: file "%s" does not contain the expected footprint "%s". (%s:%s)' 
+                        % (footprint_path, footprint, category, component_id), 'yellow'), end='', flush=True)
 
     # Do not update anything
     return None, -1
