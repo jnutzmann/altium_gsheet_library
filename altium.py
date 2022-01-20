@@ -210,11 +210,28 @@ def getLibraryFiles(alitum_config):
 
 def fileValidator(symbol_files, footprint_files, categories, rows):
 
-    symbol_path = rows[categories.field_index('library_path')].lower()
-    footprint_path = rows[categories.field_index('footprint_path')].lower()
+    # We add the try/except clauses here so that if the row is partially complete
+    # we don't throw an index error and hang the sync.
+    
+    try:
+        symbol_path = rows[categories.field_index('library_path')].lower()
+    except IndexError:
+        symbol_path = ''
 
-    symbol = rows[categories.field_index('library_ref')]
-    footprint = rows[categories.field_index('footprint_ref')]
+    try:
+        footprint_path = rows[categories.field_index('footprint_path')].lower()
+    except IndexError:
+        footprint_path = ''
+
+    try:
+        symbol = rows[categories.field_index('library_ref')]
+    except IndexError:
+        symbol = ''
+
+    try:
+        footprint = rows[categories.field_index('footprint_ref')]
+    except IndexError:
+        footprint = ''
 
 
     category = categories.name
