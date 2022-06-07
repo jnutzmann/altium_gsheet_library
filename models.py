@@ -32,6 +32,7 @@ class Category:
         self.row_count = row_count
         self.fields = []
         self.link_counts = 0
+        self.raw_rows = None
 
 
     def add_field(self, field):

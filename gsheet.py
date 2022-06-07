@@ -59,24 +59,23 @@ class GSheetReader:
             row_count = s['properties']['gridProperties']['rowCount']
             self.categories[category_name] = Category(category_name, row_count)
 
-
-        for c in self.categories:
-            header_row = self._sheet.values().get(
-                spreadsheetId=self._config['sheet_id'], 
-                range='%s!1:1' % c).execute().get('values')[0]
-
-            for h in header_row:
-                self.categories[c].add_field(Field(h))
-
+        if 'custom_required_fields' in self._config:
+            custom_req = json.loads(self._config['custom_required_fields'])
+        else:
+            custom_req = []
 
         invalid_categories = []
 
-        for c in self.categories: 
+        for c in self.categories:
+            rows = self._sheet.values().get(
+                spreadsheetId=self._config['sheet_id'], 
+                range='%s!1:%i' % (c, self.categories[c].row_count)).execute().get('values')
 
-            if 'custom_required_fields' in self._config:
-                custom_req = json.loads(self._config['custom_required_fields'])
-            else:
-                custom_req = []
+            header_row = rows[0]
+            self.categories[c].raw_rows = rows[1:]
+
+            for h in header_row:
+                self.categories[c].add_field(Field(h))
             
             missing_fields = self.categories[c].get_missing_required_fields(
                 custom_req
@@ -96,9 +95,10 @@ class GSheetReader:
         component_count = 0
 
         for c in self.categories:
-            parts_rows = self._sheet.values().get(
-                spreadsheetId=self._config['sheet_id'], range='%s!2:%i' 
-                    % (c, self.categories[c].row_count)).execute().get('values')
+            parts_rows = self.categories[c].raw_rows
+            # parts_rows = self._sheet.values().get(
+            #     spreadsheetId=self._config['sheet_id'], range='%s!2:%i' 
+            #         % (c, self.categories[c].row_count)).execute().get('values')
     
             componet_id_index = self.categories[c].field_index('component_id')
 
