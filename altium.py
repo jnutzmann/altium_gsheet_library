@@ -238,16 +238,24 @@ def fileValidator(symbol_files, footprint_files, categories, rows):
     component_id = rows[categories.field_index('component_id')]
 
     if symbol_path not in symbol_files:
-        print(colored('\n -> Warning: file "%s" not found in symbol folder. (%s:%s)' 
-                            % (symbol_path, category, component_id), 'yellow'), end='', flush=True)
+        if len(symbol_path) > 0:
+            print(colored('\n -> Warning: file "%s" not found in symbol folder. (%s:%s)' 
+                                % (symbol_path, category, component_id), 'yellow'), end='', flush=True)
+        else:
+            print(colored('\n -> Info: symbol path not specified. (%s:%s)' 
+                                % (category, component_id), 'blue'), end='', flush=True)
 
     elif symbol not in symbol_files[symbol_path]:
         print(colored('\n -> Warning: file "%s" does not contain the expected symbol "%s". (%s:%s)' 
                         % (symbol_path, symbol, category, component_id), 'yellow'), end='', flush=True)
 
     if footprint_path not in footprint_files:
-        print(colored('\n -> Warning: file "%s" not found in footprint folder. (%s:%s)' 
-                            % (footprint_path, category, component_id), 'yellow'), end='', flush=True)
+        if len(footprint_path) > 0:
+            print(colored('\n -> Warning: file "%s" not found in footprint folder. (%s:%s)' 
+                                % (footprint_path, category, component_id), 'yellow'), end='', flush=True)
+        else:
+            print(colored('\n -> Info: footprint path not specified. (%s:%s)' 
+                                % (category, component_id), 'blue'), end='', flush=True)
         
     elif footprint not in footprint_files[footprint_path]:
         print(colored('\n -> Warning: file "%s" does not contain the expected footprint "%s". (%s:%s)' 
